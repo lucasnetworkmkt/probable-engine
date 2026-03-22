@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, ExternalLink, Link as LinkIcon, Search, Pin } from 'lucide-react';
+import { Plus, Trash2, ExternalLink, Link as LinkIcon, Search, Pin, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface LinkItem {
   id: string;
@@ -19,6 +19,8 @@ export default function App() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [newCategory, setNewCategory] = useState('');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string | null>(null);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isManageOpen, setIsManageOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
@@ -168,61 +170,73 @@ export default function App() {
         </div>
 
         <div className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 mb-12">
-          <h2 className="text-lg font-semibold mb-4">Filtrar por Categoria</h2>
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setSelectedCategoryFilter(null)}
-              className={`px-3 py-1 rounded-full text-sm ${selectedCategoryFilter === null ? 'bg-indigo-600 text-white' : 'bg-zinc-800 text-zinc-400'}`}
-            >
-              Todas
-            </button>
-            {categories.map(cat => (
+          <button onClick={() => setIsFilterOpen(!isFilterOpen)} className="w-full flex items-center justify-between text-lg font-semibold mb-4">
+            Filtrar por Categoria
+            {isFilterOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+          </button>
+          {isFilterOpen && (
+            <div className="flex flex-wrap gap-2">
               <button
-                key={cat}
-                onClick={() => setSelectedCategoryFilter(cat === selectedCategoryFilter ? null : cat)}
-                className={`px-3 py-1 rounded-full text-sm ${selectedCategoryFilter === cat ? 'bg-indigo-600 text-white' : 'bg-zinc-800 text-zinc-400'}`}
+                onClick={() => setSelectedCategoryFilter(null)}
+                className={`px-3 py-1 rounded-full text-sm ${selectedCategoryFilter === null ? 'bg-indigo-600 text-white' : 'bg-zinc-800 text-zinc-400'}`}
               >
-                {cat}
+                Todas
               </button>
-            ))}
-          </div>
+              {categories.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategoryFilter(cat === selectedCategoryFilter ? null : cat)}
+                  className={`px-3 py-1 rounded-full text-sm ${selectedCategoryFilter === cat ? 'bg-indigo-600 text-white' : 'bg-zinc-800 text-zinc-400'}`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 mb-12">
-          <h2 className="text-lg font-semibold mb-4">Gerenciar Categorias</h2>
-          <div className="flex flex-wrap gap-2 mb-4">
-            {categories.map(cat => (
-              <div key={cat} className="flex items-center gap-2 bg-zinc-800 px-3 py-1 rounded-full text-sm">
-                {cat}
-                <button onClick={() => {
-                  setCategories(prev => prev.filter(c => c !== cat));
-                  if (selectedCategoryFilter === cat) setSelectedCategoryFilter(null);
-                }} className="text-zinc-500 hover:text-red-400">
-                  <Trash2 size={14} />
+          <button onClick={() => setIsManageOpen(!isManageOpen)} className="w-full flex items-center justify-between text-lg font-semibold mb-4">
+            Gerenciar Categorias
+            {isManageOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+          </button>
+          {isManageOpen && (
+            <>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {categories.map(cat => (
+                  <div key={cat} className="flex items-center gap-2 bg-zinc-800 px-3 py-1 rounded-full text-sm">
+                    {cat}
+                    <button onClick={() => {
+                      setCategories(prev => prev.filter(c => c !== cat));
+                      if (selectedCategoryFilter === cat) setSelectedCategoryFilter(null);
+                    }} className="text-zinc-500 hover:text-red-400">
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Nova categoria"
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                <button
+                  onClick={() => {
+                    if (newCategory && !categories.includes(newCategory)) {
+                      setCategories([...categories, newCategory]);
+                      setNewCategory('');
+                    }
+                  }}
+                  className="bg-zinc-800 hover:bg-zinc-700 text-white font-semibold rounded-xl px-4 py-2 transition"
+                >
+                  Criar
                 </button>
               </div>
-            ))}
-          </div>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              placeholder="Nova categoria"
-              value={newCategory}
-              onChange={(e) => setNewCategory(e.target.value)}
-              className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-            <button
-              onClick={() => {
-                if (newCategory && !categories.includes(newCategory)) {
-                  setCategories([...categories, newCategory]);
-                  setNewCategory('');
-                }
-              }}
-              className="bg-zinc-800 hover:bg-zinc-700 text-white font-semibold rounded-xl px-4 py-2 transition"
-            >
-              Criar
-            </button>
-          </div>
+            </>
+          )}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
